@@ -1,0 +1,160 @@
+# coastal-phyto-detect
+
+**Hyperspectral detection and classification of coastal phytoplankton species
+from PANTHYR radiometer data**
+
+This repository provides a Python processing pipeline for the automated
+detection of *Phaeocystis globosa*, diatoms, and cyanobacteria in Belgian
+coastal waters using in-situ hyperspectral water reflectance (ρ_w) measured
+by the PANTHYR autonomous radiometer network.
+
+The pipeline converts raw PANTHYR CSV files into a quality-controlled,
+ML-ready dataset containing per-day spectral indices and classification labels,
+designed to feed downstream machine learning models (work package WP2).
+
+---
+
+## Algorithms implemented
+
+| Index / method | Species target | Reference |
+|---|---|---|
+| **MALH** — Modified Astoreca Line Height | *P. globosa* | Lavigne et al. (2022) |
+| **Lubac D² classifier** — second derivative of ρ_wN | *P. globosa* | Lubac et al. (2008) |
+| **CRAT** — NIR-red chlorophyll-a | bloom biomass | Ruddick et al. (2001) |
+
+Water absorption uses the Buiteveld et al. (1994) look-up table with
+temperature correction (default T = 10 °C, Belgian coastal water).
+
+---
+
+## Repository structure
+
+```
+coastal-phyto-detect/
+├── panthyr/                  # Core Python package
+│   ├── __init__.py
+│   ├── config.py             # All paths and algorithm constants
+│   ├── io.py                 # Raw CSV reader, datacube load/save
+│   ├── algorithms.py         # MALH, CRAT, D², Lubac classifier
+│   ├── qc.py                 # Quality control filters
+│   └── dataset.py            # High-level orchestration functions
+│
+├── notebooks/
+│   ├── 01_build_datacube.ipynb    # Raw CSV → QC datacube (.npz)
+│   ├── 02_make_dataset.ipynb      # Datacube → ML-ready CSV + figures
+│   └── 03_analysis_visualization.ipynb  # Exploratory spectral analysis
+│
+├── data/
+│   ├── raw/                  # Raw PANTHYR CSV files (not tracked by git)
+│   │   ├── RT1_2025/
+│   │   └── buiteveld_coeffs.csv
+│   └── processed/            # Datacubes and datasets (not tracked by git)
+│
+├── pyproject.toml
+└── README.md
+```
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/<your-org>/coastal-phyto-detect.git
+cd coastal-phyto-detect
+pip install -e .
+```
+
+**Dependencies** (automatically installed via `pyproject.toml`):
+`numpy`, `scipy`, `pandas`, `matplotlib`
+
+---
+
+## Quick start
+
+### Step 1 — Build the datacube from raw files
+
+Open `notebooks/01_build_datacube.ipynb` and set `STATION` and `YEAR`:
+
+```python
+STATION = "RT1"
+YEAR    = 2025
+```
+
+This reads all `*QA_data.csv` files from `data/raw/RT1_2025/`, applies
+quality control (sun-glint filter, NaN filter), and saves a compressed
+datacube to `data/processed/datacube_RT1_2025.npz`.
+
+### Step 2 — Compute spectral indices and build the ML dataset
+
+Open `notebooks/02_make_dataset.ipynb`. Running `make_dataset()` computes
+CHL, MALH, D²ρ_w, and the Lubac P. globosa label for each spectrum, selects
+one spectrum per day (closest to solar noon), and saves the result as:
+
+```
+data/processed/REFERENCE_DATASET_4_WP2_RT1_2025.csv
+```
+
+### Step 3 — Exploratory analysis
+
+`notebooks/03_analysis_visualization.ipynb` provides mean spectral signatures,
+interquartile ranges, and MALH vs Chl-a scatter plots by species class.
+
+---
+
+## Configuration
+
+All paths and algorithm constants are centralised in `panthyr/config.py`.
+Edit only that file when adapting the pipeline to a new station or year.
+
+Key parameters:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `D2_NORM_WL` | `None` (→ 442.5 nm) | Normalisation wavelength for D² |
+| `D2_DELTA` | 2.5 nm | Wavelength step for second derivative |
+| `BUITEVELD_T` | 10.0 °C | Water temperature for absorption correction |
+| `QC_SZA_MAX` | 75° | Maximum solar zenith angle |
+| `QC_LDEX_MAX` | 0.05 sr⁻¹ | Maximum Ld/Ed ratio at 750 nm |
+
+---
+
+## Stations supported
+
+| Station | Longitude | Latitude | Description |
+|---|---|---|---|
+| RT1 | 2.9193 °E | 51.2464 °N | Belgian Coastal Zone reference tower |
+
+
+---
+
+## Data format
+
+### Input — raw PANTHYR CSV (`*QA_data.csv`)
+
+| Column | Description |
+|---|---|
+| `wavelength` | Wavelength [nm] |
+| `rhow_nosc` | Water reflectance, sky-glint corrected [sr⁻¹] |
+| `lu` | Upwelling radiance [W m⁻² nm⁻¹ sr⁻¹] |
+| `ed` | Downwelling irradiance [W m⁻² nm⁻¹] |
+| `solar_zenith_angle` | Solar zenith angle [°] |
+
+### Output — ML-ready dataset CSV
+
+Columns: `date`, `CHL`, `MALH`, `P_LUB`, `rhow_355.0` … `rhow_945.0`,
+`D2rhow_355.0` … `D2rhow_945.0`
+
+---
+
+## References
+
+- Lavigne, H. et al. (2022). *Remote Sensing of Environment*, 282, 113270.
+- Lubac, B. et al. (2008). *Journal of Geophysical Research: Oceans*, 113.
+- Ruddick, K. et al. (2001). *Applied Optics*, 40(9).
+- Buiteveld, H. et al. (1994). *Proc. SPIE* — Ocean Optics XII.
+
+---
+
+## License
+
+[To be defined by project consortium]
