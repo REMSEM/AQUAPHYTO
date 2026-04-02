@@ -1,0 +1,5 @@
+File,Resolution (nm),N spectra,P. globosa (n),P. globosa (%),Diatoms (n),CHL valid (n),MALH P.glob median,MALH Diatom median,Candidate threshold,Misclassified (%)
+chime_05_meas_01,5.0,183,0,0.0,183,0,—,-0.00162,-0.00072,—
+chime_05_belgium,5.0,779,141,18.1,638,0,-0.0002,-0.00252,-0.00142,37.6
+chime_10_meas_01,10.0,183,12,6.6,171,0,-0.00216,-0.00077,-8e-05,91.7
+chime_10_belgium,10.0,779,36,4.6,743,0,0.00253,-0.00173,-0.00103,8.3

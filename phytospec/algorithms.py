@@ -6,14 +6,13 @@ Each function takes (rhow, wl) arrays and returns a scalar or array.
 
 References
 ----------
-MALH : Lavigne et al. (2022), Remote Sensing of Environment, 282, 113270
-       R implementation: AstorecaC() in functions_chl_phaeo.R
-CHL  : Ruddick et al. (2001), Appl. Opt. 40  / Buiteveld et al. (1994)
-       R implementation: CRAT() in functions_chl_phaeo.R
-D2   : Lubac et al. (2008), JGR Oceans 113
-       R implementation: D2() in functions_chl_phaeo.R
-
-
+MALH      : Lavigne et al. (2022), Remote Sensing of Environment, 282, 113270
+             R implementation: AstorecaC() in functions_chl_phaeo.R
+CHL (CRAT): Ruddick et al. (2001), Appl. Opt. 40  / Buiteveld et al. (1994)
+             R implementation: CRAT() in functions_chl_phaeo.R
+             Requires ≥ 50–200 bands depending on sensor (see min_bands param).
+D2        : Lubac et al. (2008), JGR Oceans 113
+             R implementation: D2() in functions_chl_phaeo.R
 """
 
 import numpy as np
@@ -106,12 +105,15 @@ def compute_MALH(rhow: np.ndarray, wl: np.ndarray,
 # ── Chlorophyll-a (CRAT algorithm) ────────────────────────────────────────────
 
 def compute_CHL(rhow: np.ndarray, wl: np.ndarray,
-                aphy: float = cfg.APH_STAR_670) -> float:
+                aphy:      float = cfg.APH_STAR_670,
+                min_bands: int   = cfg.CHL_MIN_BANDS_PANTHYR) -> float:
     """
     Chlorophyll-a using the CRAT red-peak algorithm.
 
     Algorithm (Ruddick et al. 2001 / Buiteveld et al. 1994):
-      1. Require ≥ 200 non-NaN wavelengths (same threshold as R)
+      1. Require ≥ min_bands non-NaN wavelengths
+         Default: 200 for PANTHYR (Δλ = 2.5 nm).
+         Use cfg.CHL_MIN_BANDS_CHIME (= 50) for CHIME simulation data.
       2. Fix λ1 = 672 nm
       3. Find λmax = wavelength of maximum ρw in the strictly open window
          (672, 750] nm  — R: which(lambda1 < wl & wl <= 750)
@@ -122,18 +124,18 @@ def compute_CHL(rhow: np.ndarray, wl: np.ndarray,
 
     Parameters
     ----------
-    rhow  : water reflectance spectrum [sr⁻¹]
-    wl    : wavelength grid [nm], same length as rhow
-    aphy  : specific Chl-a absorption at 670 nm [m² mg⁻¹] (default 0.016)
+    rhow      : water reflectance spectrum [sr⁻¹]
+    wl        : wavelength grid [nm], same length as rhow
+    aphy      : specific Chl-a absorption at 670 nm [m² mg⁻¹] (default 0.016)
+    min_bands : minimum number of non-NaN bands required (sensor-dependent).
+                Use cfg.CHL_MIN_BANDS_CHIME for CHIME data.
 
     Returns
     -------
     float : Chl-a [mg m⁻³], or NaN if spectral shape is invalid.
-
- 
     """
     # ── guard: require enough valid wavelengths ───────────────────
-    if np.sum(~np.isnan(rhow)) < 200:
+    if np.sum(~np.isnan(rhow)) < min_bands:
         return np.nan
 
     lam1 = 672.0
@@ -191,6 +193,7 @@ def compute_CHL(rhow: np.ndarray, wl: np.ndarray,
 
     chl = (aw2 - aw1) / aphy
     return float(chl) if chl > 0 else np.nan
+
 
 
 # ── Smoothing ─────────────────────────────────────────────────────────────────
@@ -291,6 +294,7 @@ def lubac_phaeo_index(wl: np.ndarray, d2r: np.ndarray) -> int:
 
         # ── Both must shift to confirm P. globosa ─────────────────────────
         #   Diatoms   : max ~463,  min2 ~485  → both below threshold
+        
         #   P. globosa: max ~475,  min2 ~510  → both above threshold
         return int(wl_max >= 470.0 and wl_min2 >= 495.0)
 
