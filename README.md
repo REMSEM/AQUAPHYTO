@@ -6,7 +6,7 @@ This repository provides a Python processing pipeline for the automated detectio
 
 The pipeline converts raw PANTHYR CSV files into a quality-controlled, ML-ready dataset containing per-day spectral indices and classification labels, designed to feed downstream machine learning models.
 
-This pipeline has been developed with the [OBAMA-NEXT](https://obama-next.eu/) project (WP2, OBAMA-NEXT - OBAMA-NEXT’s main goal is to develop a toolbox which generates and delivers the informa…) and optimized within the ESA-AQUATIME project, including adaptation to detect Cyanobacteria (WP3, https://sup.apex.esa.int/en/aquatime). 
+This pipeline has been developed with the [OBAMA-NEXT](https://obama-next.eu/) project (WP2, OBAMA-NEXT - OBAMA-NEXT’s main goal is to develop a toolbox which generates and delivers the informa…) and optimized within the ESA-AQUATIME project, including adaptation to detect Cyanobacteria (WP3,[AQUATIME](https://sup.apex.esa.int/en/aquatime). 
 
 ---
 
