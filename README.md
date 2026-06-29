@@ -4,7 +4,9 @@ Hyperspectral detection and classification of coastal phytoplankton species from
 
 This repository provides a Python processing pipeline for the automated detection of *Phaeocystis globosa*, diatoms, and cyanobacteria in Belgian coastal waters using in-situ hyperspectral water reflectance (ρ_w) measured by the PANTHYR autonomous radiometer network.
 
-The pipeline converts raw PANTHYR CSV files into a quality-controlled, ML-ready dataset containing per-day spectral indices and classification labels, designed to feed downstream machine learning models (work package WP2).
+The pipeline converts raw PANTHYR CSV files into a quality-controlled, ML-ready dataset containing per-day spectral indices and classification labels, designed to feed downstream machine learning models.
+
+This pipeline has been developed with the [OBAMA-NEXT](https://obama-next.eu/) project (WP2, OBAMA-NEXT - OBAMA-NEXT’s main goal is to develop a toolbox which generates and delivers the informa…) and optimized within the ESA-AQUATIME project, including adaptation to detect Cyanobacteria (WP3, https://sup.apex.esa.int/en/aquatime). 
 
 ---
 
