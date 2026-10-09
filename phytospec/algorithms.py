@@ -1,6 +1,6 @@
 """
 phytospec/algorithms.py
-=====================
+=======================
 Pure spectral algorithms — no I/O, no side effects.
 Each function takes (rhow, wl) arrays and returns a scalar or array.
 
@@ -15,6 +15,7 @@ D2        : Lubac et al. (2008), JGR Oceans 113
              R implementation: D2() in functions_chl_phaeo.R
 """
 
+import warnings
 import numpy as np
 import pandas as pd
 from scipy.ndimage import uniform_filter1d
@@ -71,7 +72,7 @@ def compute_MALH(rhow: np.ndarray, wl: np.ndarray,
                  lNIR: float = cfg.MALH_LNIR   # 700 nm
                  ) -> float:
     """
-    Modified Astoreca Line Height (MALH) .
+    Modified Astoreca Line Height (MALH).
 
     Formula (matching R implementation):
         w    = (lc3 - l1) / (l2 - l1)          →  0.625 for defaults
@@ -202,16 +203,24 @@ def smooth_5pt(arr: np.ndarray, n_passes: int = cfg.D2_N_SMOOTH) -> np.ndarray:
     """
     5-point running-average smoothing applied `n_passes` times.
     Equivalent to R: filter(x, rep(1/5, 5), method='convolution') applied twice.
-    NaN positions are preserved.
+
+    NaN-aware: NaNs are excluded from each window average (normalised convolution)
+    and NaN positions are preserved. Without NaNs the result equals the plain
+    running mean.
+
+    Note: the window is defined in SAMPLES. Two passes = 9-point triangular kernel,
+    FWHM ≈ 5 bands (≈ 12 nm on PANTHYR, ≈ 42 nm on CHIME 8.4 nm). For sensors other
+    than PANTHYR use phytospec.cyano.smooth_gaussian_nm (width in nm).
     """
     result = arr.astype(float).copy()
     nan_mask = np.isnan(result)
     for _ in range(n_passes):
-        tmp = result.copy()
-        tmp[nan_mask] = 0.0
-        smoothed = uniform_filter1d(tmp, size=5, mode="nearest")
-        smoothed[nan_mask] = np.nan
-        result = smoothed
+        valid = (~np.isnan(result)).astype(float)
+        num = uniform_filter1d(np.nan_to_num(result), size=5, mode="nearest")
+        den = uniform_filter1d(valid, size=5, mode="nearest")
+        with np.errstate(invalid="ignore", divide="ignore"):
+            result = np.where(den > 0, num / den, np.nan)
+        result[nan_mask] = np.nan
     return result
 
 
@@ -222,17 +231,24 @@ def compute_D2(rhow: np.ndarray, wl: np.ndarray,
                delta:    float  = cfg.D2_DELTA,
                n_smooth: int    = cfg.D2_N_SMOOTH) -> np.ndarray:
     """
-    Second derivative of normalised water reflectance    
+    Second derivative of normalised water reflectance.
 
     Parameters
     ----------
     norm_wl  : normalisation wavelength [nm], or None for R-default (442.5 nm).
                  None  -> index 35 = 442.5 nm  (matches R exactly)
-                 620.0 -> 620 nm  (Lubac 2008 paper / colleague Python convention)
+                 620.0 -> 620 nm  (Lubac et al. 2008 convention)
                  Any float -> nearest wavelength in grid.
                Set globally via cfg.D2_NORM_WL in config.py.
-    delta    : wavelength step [nm] (default 2.5)
-    n_smooth : number of smoothing passes (default 2) and depends sensor
+    delta    : wavelength step [nm] (default 2.5). MUST equal the grid step of `wl`;
+               the default is only correct for PANTHYR.
+    n_smooth : number of 5-pt smoothing passes (default 2), defined in samples.
+
+    Warning
+    -------
+    norm_wl=None uses array index 35, which is 442.5 nm ONLY on the PANTHYR grid
+    (e.g. 698.2 nm on the CHIME 8.4 nm grid). Pass norm_wl explicitly for other
+    sensors. For cyanobacteria detection on any sensor use phytospec.cyano.
 
     Returns
     -------
@@ -243,7 +259,8 @@ def compute_D2(rhow: np.ndarray, wl: np.ndarray,
     else:
         norm_idx = int(np.argmin(np.abs(wl - float(norm_wl)))) # nearest grid point
 
-    if rhow[norm_idx] == 0 or np.isnan(rhow[norm_idx]):
+    # a negative normalisation value would flip the sign of D² → reject it too
+    if np.isnan(rhow[norm_idx]) or rhow[norm_idx] <= 0:
         return np.full_like(wl, np.nan, dtype=float)
 
     rhow_N = rhow / rhow[norm_idx]
@@ -264,15 +281,18 @@ def lubac_phaeo_index(wl: np.ndarray, d2r: np.ndarray) -> int:
     Classify a spectrum as P. globosa dominant (1) or absent (0).
     R function: LubacFUN().
 
-    P. globosa signature (Lubac et al. 2008):
-        local maximum in d2r in 460-480 nm range >= 471 nm
-        local minimum in d2r in 480-510 nm range >= 499 nm
+    P. globosa signature (Lubac et al. 2008): both D² features are shifted to longer
+    wavelengths than for diatoms.
+        maximum of d2r searched in 460–490 nm → P. globosa if located at ≥ 470 nm
+        minimum of d2r searched in 480–510 nm → P. globosa if located at ≥ 495 nm
+    Typical positions: diatoms max ~463 nm / min ~485 nm; P. globosa max ~475 nm / min ~510 nm.
 
     Returns
     -------
-    int : 1 = P. globosa dominance, 0 = absence
+    int : 1 = P. globosa dominance, 0 = absence (also returned, with a warning,
+          if the classification cannot be computed)
     """
-    
+
     try:
         wl = np.asarray(wl, dtype=float)
         d2r = np.asarray(d2r, dtype=float)
@@ -290,14 +310,9 @@ def lubac_phaeo_index(wl: np.ndarray, d2r: np.ndarray) -> int:
         else:
             wl_min2 = float(wl[w_min2][np.nanargmin(d2r[w_min2])])
 
-        # ── Classification ─────────────────────────────────────────────────
-
-        # ── Both must shift to confirm P. globosa ─────────────────────────
-        #   Diatoms   : max ~463,  min2 ~485  → both below threshold
-        
-        #   P. globosa: max ~475,  min2 ~510  → both above threshold
+        # ── Classification: both features must be shifted ──────────────────
         return int(wl_max >= 470.0 and wl_min2 >= 495.0)
 
-
-    except Exception:
+    except Exception as err:            # unexpected input: keep the legacy behaviour, but report it
+        warnings.warn(f'lubac_phaeo_index failed ({err!r}); spectrum classified as 0', RuntimeWarning)
         return 0

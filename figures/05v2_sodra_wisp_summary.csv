@@ -1,0 +1,21 @@
+,value
+Station / dataset,Södra Bergundasjön (WISP) / sodra_wisp
+Simulated spectra,False
+Spectra loaded / valid after QC / days,6375 / 2277 / 181
+QC rejections per test,"too_bright 23, negative 175, glint 386, time 2327, irradiance 3478, spike 68"
+High-reflectance days kept (flagged),none
+Native / effective resolution [nm],5.0 / 10.0
+Analysis grid,regular 2.5 nm
+Formula = phytospec.compute_D2 (max rel. diff),7e-15
+Sign of D² independent of normalisation,True
+Normalisations tested,"No normalisation, Norm 442.5 nm, Norm 620 nm (Lubac 2008), Norm 665 nm"
+Noise method,within-day IQR
+Pre-flight warnings,Duplicated timestamps
+In-situ match-ups (dominated / not),6 (6 / 0)
+D2_620: Cy+ share of determined days / undetermined,100% / 17%
+D2_552: Cy+ share of determined days / undetermined,85% / 17%
+D2_620: TP / FN / FP / TN,5 / 0 / 0 / 0
+D2_620: POD / FPR / KSS / AUC [95% CI],100% [57%–100%] / — / — / —
+D2_552: TP / FN / FP / TN,5 / 0 / 0 / 0
+D2_552: POD / FPR / KSS / AUC [95% CI],100% [57%–100%] / — / — / —
+Validation independent of the spectra,yes

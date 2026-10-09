@@ -1,0 +1,23 @@
+,value
+Station / dataset,"Mälaren-Görväln (CHIME, MOMO-simulated) / gorvaln_chime_sim"
+Simulated spectra,True
+Spectra loaded / valid after QC / days,1309 / 1309 / 1309
+QC rejections per test,none
+High-reflectance days kept (flagged),none
+Native / effective resolution [nm],8.4 / 8.4
+Analysis grid,native bands
+Formula = phytospec.compute_D2 (max rel. diff),3e-14
+Sign of D² independent of normalisation,True
+Normalisations tested,"No normalisation, Norm 442.5 nm, Norm 620 nm (Lubac 2008), Norm 665 nm"
+Noise method,none (simulated spectra — rule only)
+Pre-flight warnings,Native FWHM; Resolution; Simulated spectra
+In-situ match-ups (dominated / not),46 (14 / 32)
+D2_620: Cy+ share of determined days / undetermined,25% / 0%
+D2_620: bracketing bands disagree in sign,35% of spectra
+D2_552: Cy+ share of determined days / undetermined,28% / 0%
+D2_552: bracketing bands disagree in sign,28% of spectra
+D2_620: TP / FN / FP / TN,14 / 0 / 0 / 32
+D2_620: POD / FPR / KSS / AUC [95% CI],100% [78%–100%] / 0% [0%–11%] / 1.00 / 1.00 [1.00–1.00]
+D2_552: TP / FN / FP / TN,14 / 0 / 4 / 28
+D2_552: POD / FPR / KSS / AUC [95% CI],100% [78%–100%] / 12% [5%–28%] / 0.88 / 1.00 [1.00–1.00]
+Validation independent of the spectra,no — simulated spectra

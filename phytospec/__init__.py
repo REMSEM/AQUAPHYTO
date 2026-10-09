@@ -1,6 +1,7 @@
 """
-phytospec  —  spectral processing package for PANTHYR radiometer data
-====================================================================
+phytospec — spectral processing for water-reflectance radiometry
+================================================================
+PANTHYR / Hypstar / WISP measurements and CHIME-like simulated spectra.
 """
 
 from phytospec import config

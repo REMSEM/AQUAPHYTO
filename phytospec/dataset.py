@@ -1,8 +1,8 @@
 """
 phytospec/dataset.py
-==================
+====================
 High-level orchestration: raw files → datacube → ML-ready dataset.
-These are the functions you call from Jupyter notebooks.
+Public entry points used by the processing notebooks.
 """
 
 import numpy as np
@@ -13,7 +13,6 @@ from typing import Union
 from phytospec.io         import read_raw_csv, find_raw_files, save_datacube
 from phytospec.algorithms import compute_MALH, compute_CHL, compute_D2, lubac_phaeo_index
 from phytospec.qc         import qc_datacube, qc_dataset
-from phytospec import config as cfg
 
 
 # ── Step 1 ─────────────────────────────────────────────────────────────────────
@@ -91,8 +90,8 @@ def make_dataset(datacube: dict,
     Parameters
     ----------
     datacube      : output of build_datacube() or load_datacube()
-    one_per_day   : keep one spectrum per calendar day
-                    (noon window 09-15 UTC preferred, else highest MALH of day)
+    one_per_day   : keep one spectrum per calendar day (the one closest to solar
+                    noon; see noon_max_offset_hours)
     apply_chl_qc  : if True, remove spectra with CHL <= cfg.QC_CHL_MIN (3 mg/m3).
                     Default False — keeps all valid spectra so the ML dataset
                     covers the full season including low-biomass periods.
@@ -101,7 +100,7 @@ def make_dataset(datacube: dict,
                 spectrum. Days with no spectrum within this window
                 are dropped entirely.
                 None (default) → keep closest, no exclusion.
-                3.0 → matches colleague R pipeline exactly.
+                3.0 → matches the reference R pipeline.
     save_path     : optional CSV path for the output dataset
 
     Returns

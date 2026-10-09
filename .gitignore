@@ -35,3 +35,8 @@ Thumbs.db
 # Logs
 *.log
 debug.log
+
+__pycache__/
+*.pyc
+phytospec/*_v0.py
+notebooks/normalization_test.ipynb

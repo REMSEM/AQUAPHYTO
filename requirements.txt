@@ -16,5 +16,8 @@ seaborn>=0.13.0            # statistical plots (heatmaps, distributions, pairplo
 # acolite>=20231023          # atmospheric correction for PACE, Sentinel-2/3, Landsat
                            # install via: pip install git+https://github.com/acolite/acolite
 
+# ── Input files ────────────────────────────────────────────────────────────────
+openpyxl>=3.1.0           # read .xlsx in-situ and WISP files (notebook 05 v2)
+
 # ── Optional but recommended ───────────────────────────────────────────────────
 nbformat>=5.9.0            # read/write .ipynb files programmatically

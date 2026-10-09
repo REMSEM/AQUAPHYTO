@@ -7,8 +7,6 @@ Edit only this file when paths or constants change.
 
 from pathlib import Path
 
-# ── Project root  ──
-# ROOT = Path(__file__).parent
 # ── Project root ───────────────────────────────────────────────────────────────
 ROOT = Path(__file__).parent.parent
 
@@ -20,7 +18,7 @@ DATA_PROCESSED = ROOT / "data" / "processed"
 # Station-specific raw data folders
 RT1_RAW_2024    = DATA_RAW / "RT1_2024"
 RT1_RAW_2025    = DATA_RAW / "RT1_2025"
-CPOWER_RAW_2025 = DATA_RAW / "CPOWER_2025"   # add 
+CPOWER_RAW_2025 = DATA_RAW / "CPOWER_2025"
 
 # Processed datacubes (.npz)
 RT1_DATACUBE_2025    = DATA_PROCESSED / "datacube_RT1_2025.npz"
@@ -83,20 +81,29 @@ MALH_L2   = 482.5
 MALH_L3   = 490.0
 MALH_LNIR = 700.0
 
-# Second derivative (Lubac et al. 2008)
-#D2_NORM_WL  = 620.0   # normalisation wavelength [nm] D2_NORM_WL = None    
-# Second derivative (Lubac et al. 2008)
+# Second derivative (Lubac et al. 2008) — legacy PANTHYR implementation (algorithms.compute_D2)
 # D2_NORM_WL: normalisation wavelength [nm]
-#   None   → use array index 35 = 442.5 nm  
-#   620.0  → use 620 nm  (Lubac 2008 paper convention,  Python code)
-#   any float → nearest wavelength in the grid will be used
-D2_NORM_WL  = None    # default: 442.5 nm 
-# D2_DELTA: wavelength step for second derivative calculation [nm]
-D2_DELTA    = 2.5     # wavelength step [nm]
-D2_N_SMOOTH = 2       # number of 5-pt smoothing passes depends of the sensor
+#   None      → array index 35 (= 442.5 nm on the PANTHYR grid only)
+#   620.0     → 620 nm (Lubac et al. 2008 convention)
+#   any float → nearest wavelength in the grid
+D2_NORM_WL  = None    # default: index 35 (442.5 nm on PANTHYR)
+D2_DELTA    = 2.5     # wavelength step [nm]; must equal the grid step (PANTHYR: 2.5 nm)
+D2_N_SMOOTH = 2       # number of 5-point smoothing passes (defined in samples; PANTHYR only)
 
 # ── QC thresholds ─────────────────────────────────────────────────────────────
 QC_LDEX_MAX  = 0.05   # max Ld/Ed at 750 nm  [sr⁻¹]
 QC_NAN_MAX   = 10     # max NaN per spectrum
 QC_SZA_MAX   = 75.0   # max solar zenith angle [°]
 QC_CHL_MIN   = 3.0    # min Chl-a to keep     [mg m⁻³]
+
+# ── Cyanobacteria detection (phytospec/cyano.py) ───────────────────────────────
+# Second derivative: explicit 3-point formula, step taken from the actual grid.
+# Smoothing is defined in nm (target effective resolution), never in samples.
+CY_DESIGN_STEP  = 2.5                      # nm — fine sensors are resampled to this regular grid
+CY_SMOOTH_FWHM  = 10.0                     # nm — target resolution for REAL measurements;
+                                           #      D²(620) > 0 loses specificity from ~12 nm (simulated CHIME tests)
+                                           #      (None for noise-free simulated spectra)
+CY_D2_WL        = 620.0                    # nm — phycocyanin trough: D²(620) > 0 → Cy+
+CY_D2_WL_LEGACY = 552.5                    # nm — legacy green-peak index: D²(552) < 0 → Cy+
+CY_TROUGH_WLS   = (597.5, 622.5, 647.5)    # nm — trough depth PC_T (experimental, not used for detection)
+CY_DOM_FRAC     = 0.30                     # in-situ: cyano-dominated if ≥ 30 % of phytoplankton biomass

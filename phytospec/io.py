@@ -1,11 +1,10 @@
 """
 phytospec/io.py
-=============
+===============
 Reading raw PANTHYR CSV files and saving/loading processed datacubes.
 """
 
 import re
-import glob
 import numpy as np
 import pandas as pd
 from pathlib import Path

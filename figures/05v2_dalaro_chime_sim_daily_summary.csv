@@ -1,0 +1,23 @@
+,value
+Station / dataset,"Dalarö (CHIME, MOMO-simulated, daily) / dalaro_chime_sim_daily"
+Simulated spectra,True
+Spectra loaded / valid after QC / days,182 / 182 / 182
+QC rejections per test,none
+High-reflectance days kept (flagged),"2024-08-10, 2024-08-11"
+Native / effective resolution [nm],8.4 / 8.4
+Analysis grid,native bands
+Formula = phytospec.compute_D2 (max rel. diff),4e-14
+Sign of D² independent of normalisation,True
+Normalisations tested,"No normalisation, Norm 442.5 nm, Norm 620 nm (Lubac 2008), Norm 665 nm"
+Noise method,none (simulated spectra — rule only)
+Pre-flight warnings,Native FWHM; Resolution; Simulated spectra
+In-situ match-ups (dominated / not),26 (13 / 13)
+D2_620: Cy+ share of determined days / undetermined,45% / 0%
+D2_620: bracketing bands disagree in sign,68% of spectra
+D2_552: Cy+ share of determined days / undetermined,60% / 0%
+D2_552: bracketing bands disagree in sign,87% of spectra
+D2_620: TP / FN / FP / TN,12 / 1 / 1 / 12
+D2_620: POD / FPR / KSS / AUC [95% CI],92% [67%–99%] / 8% [1%–33%] / 0.85 / 0.97 [0.89–1.00]
+D2_552: TP / FN / FP / TN,10 / 3 / 6 / 7
+D2_552: POD / FPR / KSS / AUC [95% CI],77% [50%–92%] / 46% [23%–71%] / 0.31 / 0.69 [0.47–0.88]
+Validation independent of the spectra,no — simulated spectra

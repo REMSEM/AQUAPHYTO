@@ -1,12 +1,11 @@
 """
 phytospec/qc.py
-=============
+===============
 Quality control filters for PANTHYR datacubes and computed datasets.
 All functions return a boolean mask (True = keep) and a log dict.
 """
 
 import numpy as np
-import pandas as pd
 from phytospec import config as cfg
 from phytospec.algorithms import interp_at
 
@@ -82,7 +81,6 @@ def qc_dataset(RHOW:  np.ndarray,
     R900 = np.array([interp_at(wl, RHOW[i, :], 900.0) for i in range(N)])
     with np.errstate(invalid="ignore"):
         bad_nir = (R900 > 0.5 * Rmax) | (SZA > sza_max)
-    bad_nir = np.where(np.isnan(bad_nir), False, bad_nir)
     keep   &= ~bad_nir
     log["nir_sza_removed"] = int(bad_nir.sum())
 

@@ -1,0 +1,21 @@
+,value
+Station / dataset,L. Võrtsjärv (Hypstar) / vortsjarv_hypstar
+Simulated spectra,False
+Spectra loaded / valid after QC / days,129 / 127 / 127
+QC rejections per test,"too_bright 1, negative 1"
+High-reflectance days kept (flagged),none
+Native / effective resolution [nm],3.0 / 10.0
+Analysis grid,regular 2.5 nm
+Formula = phytospec.compute_D2 (max rel. diff),4e-15
+Sign of D² independent of normalisation,True
+Normalisations tested,"No normalisation, Norm 442.5 nm, Norm 620 nm (Lubac 2008), Norm 665 nm"
+Noise method,Monte-Carlo (100 realisations)
+Pre-flight warnings,none
+In-situ match-ups (dominated / not),9 (9 / 0)
+D2_620: Cy+ share of determined days / undetermined,100% / 0%
+D2_552: Cy+ share of determined days / undetermined,87% / 4%
+D2_620: TP / FN / FP / TN,9 / 0 / 0 / 0
+D2_620: POD / FPR / KSS / AUC [95% CI],100% [70%–100%] / — / — / —
+D2_552: TP / FN / FP / TN,8 / 1 / 0 / 0
+D2_552: POD / FPR / KSS / AUC [95% CI],89% [57%–98%] / — / — / —
+Validation independent of the spectra,yes
